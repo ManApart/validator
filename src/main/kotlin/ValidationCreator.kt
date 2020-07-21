@@ -66,7 +66,7 @@ fun addElseIfs(source: Class<*>, pathPieces: List<String>, depth: Int, previousP
     val result = source.getMethod(methodName).returnType
     val fullPath = "${previousPath}.${methodName}()"
 
-    val elsif = "} else if(${fullPath} == null){"
+    val elsif = "} else if(${fullPath} == null){\n"
 
     val returnLine = "return \"object." + highlightNullPiece(pathPieces, depth) + "\";\n"
 
