@@ -24,9 +24,9 @@ private fun getNullSafeResult(source: Any, pathPieces: List<String>): Any? {
 }
 
 
-fun createValidator(source: Any, path: String): String {
+fun createValidator(source: Class<*>, path: String): String {
     val pathPieces = path.split(".")
-    val className = source.javaClass.simpleName
+    val className = source.simpleName
     val validateFunctionName = "validate" + dotPathToCamelCase(path)
 
     return """
@@ -55,9 +55,27 @@ fun highlightNullPiece(pathPieces: List<String>, highlight: Int): String {
             ).joinToString(".")
 }
 
-private fun createIfStatement(source: Any, pathPieces: List<String>): String {
+private fun createIfStatement(source: Class<*>, pathPieces: List<String>): String {
     return "if (object == null) {\n" +
-            "return \"{object}.${pathPieces.joinToString(".")}\";"
+            "return \"{object}.${pathPieces.joinToString(".")}\";\n" +
+            addElseIfs(source, pathPieces, 0, "object") + "}"
+}
 
+fun addElseIfs(source: Class<*>, pathPieces: List<String>, depth: Int, previousPath: String): String {
+    val methodName = "get" + pathPieces[depth].capitalize()
+    val result = source.getMethod(methodName).returnType
+    val fullPath = "${previousPath}.${methodName}()"
+
+    val elsif = "} else if(${fullPath} == null){"
+
+    val returnLine = "return \"object." + highlightNullPiece(pathPieces, depth) + "\";\n"
+
+    val additional = if (depth < pathPieces.size-1) {
+        addElseIfs(result, pathPieces, depth + 1, fullPath)
+    } else {
+        ""
+    }
+
+    return elsif + returnLine + additional
 
 }

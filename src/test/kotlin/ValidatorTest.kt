@@ -46,7 +46,7 @@ class ValidatorTest {
         @Test
     fun generateSingleFieldValidationCode() {
         val nested = GreatGrandParent(null)
-        val result = createValidator(nested, "grandParent.parent.child.name").replace("  ", "")
+        val result = createValidator(GreatGrandParent::class.java, "grandParent.parent.child.name").replace("  ", "")
 
             assertEquals(singleFieldValidation, result)
     }
