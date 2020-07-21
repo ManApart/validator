@@ -1,4 +1,4 @@
-package example.java;
+package example.java.source;
 
 public class GreatGrandParent {
     private final GrandParent parent;

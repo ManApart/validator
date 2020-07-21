@@ -1,4 +1,4 @@
-package example.java;
+package example.java.source;
 
 public class Parent {
     private final Child child;
