@@ -9,21 +9,6 @@ fun createValidator(validations: List<() -> Any?>) {
 
 }
 
-fun getNullSafeValue(source: Any, path: String): Any? {
-    val pathPieces = path.split(".")
-    return getNullSafeResult(source, pathPieces)
-}
-
-private fun getNullSafeResult(source: Any, pathPieces: List<String>): Any? {
-    val methodName = "get" + pathPieces.first().capitalize()
-    val result = source.javaClass.getMethod(methodName).invoke(source)
-    if (pathPieces.size > 1 && result != null) {
-        return getNullSafeResult(result, pathPieces.subList(1, pathPieces.size))
-    }
-    return result
-}
-
-
 fun createValidator(source: Class<*>, path: String): String {
     val pathPieces = path.split(".")
     val className = source.simpleName
@@ -42,17 +27,6 @@ fun createValidator(source: Class<*>, path: String): String {
         }
     }
     """.trimIndent()
-}
-
-fun dotPathToCamelCase(path: String): String {
-    return path.split(".").joinToString("") { it.capitalize() }
-}
-
-fun highlightNullPiece(pathPieces: List<String>, highlight: Int): String {
-    return (pathPieces.subList(0, highlight)
-            + listOf("{${pathPieces[highlight]}}")
-            + pathPieces.subList(highlight + 1, pathPieces.size)
-            ).joinToString(".")
 }
 
 private fun createIfStatement(source: Class<*>, pathPieces: List<String>): String {
