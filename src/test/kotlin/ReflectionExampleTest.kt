@@ -17,7 +17,7 @@ class ReflectionExampleTest {
     @Test
     fun nullSafeGetterThroughReflectionNotNull() {
         val nested = GreatGrandParent(
-            GrandParent(Parent(Child(null)))
+            GrandParent(Parent(Child(null, null)))
         )
         val result = getNullSafeValue(nested, "grandParent.parent.child")
         org.junit.Assert.assertEquals(nested.grandParent.parent.child, result)
@@ -26,7 +26,7 @@ class ReflectionExampleTest {
     @Test
     fun nullSafeGetterThroughReflectionNotNullWithName() {
         val nested = GreatGrandParent(
-            GrandParent(Parent(Child("Child")))
+            GrandParent(Parent(Child("Child", null)))
         )
         val result = getNullSafeValue(nested, "grandParent.parent.child.name")
         org.junit.Assert.assertEquals("Child", result)
