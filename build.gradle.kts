@@ -15,10 +15,16 @@ dependencies {
     testImplementation("junit", "junit", "4.12")
 }
 
+
+
 configure<JavaPluginConvention> {
-    sourceCompatibility = JavaVersion.VERSION_1_8
+    sourceCompatibility = JavaVersion.VERSION_1_9
 }
 tasks {
+    compileJava {
+        sourceCompatibility = "9"
+        targetCompatibility = "9"
+    }
     compileKotlin {
         kotlinOptions.jvmTarget = "1.8"
     }

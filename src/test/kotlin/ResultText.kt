@@ -42,5 +42,6 @@ public class GreatGrandParentValidator {
 
         return null;
     }
+    
 }
 """.trimIndent().replace("  ", "")

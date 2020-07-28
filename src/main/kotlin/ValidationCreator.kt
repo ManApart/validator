@@ -9,24 +9,52 @@ fun createValidator(validations: List<() -> Any?>) {
 
 }
 
-fun createValidator(source: Class<*>, path: String): String {
-    val pathPieces = path.split(".")
+fun createValidator(source: Class<*>, vararg paths: String): String {
     val className = source.simpleName
-    val validateFunctionName = "validate" + dotPathToCamelCase(path)
+
+    val pathPieces = paths.map { it.split(".") }
+    val validateFunctionNames = paths.map { "validate" + dotPathToCamelCase(it) }
+
+    val functionCallers = createFunctionCallers(validateFunctionNames)
+    val functionDefinitions = createFunctionDefinitions(source, className, validateFunctionNames, pathPieces)
 
     return """
-    public class ${className}Validator {
-        public static String validate($className object) {
-            return ${validateFunctionName}(object);
-        }
+    import java.util.List;
+    import java.util.Objects;
+    import java.util.stream.Collectors;
 
-        private static String ${validateFunctionName}($className object) {
+    public class ${className}Validator {
+        public static List<String> validate($className object) {
+            return List.of(
+                $functionCallers
+            ).stream().filter(Objects::nonNull).collect(Collectors.toList());
+        }
+        
+        $functionDefinitions
+    }
+    """.trimIndent()
+}
+
+private fun createFunctionCallers(validateFunctionNames: List<String>): String {
+    return validateFunctionNames.joinToString(",\n") { "${it}(object)" }
+}
+
+private fun createFunctionDefinitions(
+    source: Class<*>,
+    className: String,
+    validateFunctionNames: List<String>,
+    allPathPieces: List<List<String>>
+): String {
+    return validateFunctionNames.indices.joinToString("\n") {
+        val validateFunctionName = validateFunctionNames[it]
+        val pathPieces = allPathPieces[it]
+        """private static String ${validateFunctionName}($className object) {
             ${createIfStatement(source, pathPieces)}
 
             return null;
         }
+        """
     }
-    """.trimIndent()
 }
 
 private fun createIfStatement(source: Class<*>, pathPieces: List<String>): String {
@@ -44,7 +72,7 @@ fun addElseIfs(source: Class<*>, pathPieces: List<String>, depth: Int, previousP
 
     val returnLine = "return \"object." + highlightNullPiece(pathPieces, depth) + "\";\n"
 
-    val additional = if (depth < pathPieces.size-1) {
+    val additional = if (depth < pathPieces.size - 1) {
         addElseIfs(result, pathPieces, depth + 1, fullPath)
     } else {
         ""
